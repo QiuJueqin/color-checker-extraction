@@ -6,7 +6,7 @@
 clear all; close all; clc;
 cc_img = imread('dsg.png');
 colors = checker2colors(cc_img, [10, 14], 'allowadjust', true, 'roisize', 50);
-checker = colors2checker(colors, 'array', [10, 14]);
+checker = colors2checker(colors, 'layout', [10, 14]);
 
 
 %% demo 2
@@ -23,4 +23,4 @@ cc_img = imread('passport.jpg');
 clearvars -except coord
 cc_img = imread('passport.jpg');
 colors = checker2colors(cc_img, [4, 6], 'roi', coord);
-checker = colors2checker(colors); % not parsing 'array' parameter works well too
+checker = colors2checker(colors); % not parsing 'layout' parameter works well too

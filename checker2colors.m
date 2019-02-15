@@ -1,18 +1,18 @@
-function [colors, roi_rects] = checker2colors(checker_img, array, varargin)
+function [colors, roi_rects] = checker2colors(checker_img, layout, varargin)
 %%
 % CHECKER2COLORS extracts color responses from an image containing color
 % checker. Two modes, 'drag' and 'click', are supported. ('auto' mode is to
 % be done in the future)
 %
 % USAGE:
-% [colors, roi_rects] = checker2colors(checker_img, array,...
+% [colors, roi_rects] = checker2colors(checker_img, layout,...
 %                                      'param', value, ...);
 %
 % INPUTS:
 % checker_img:       image containing color checker. It can also be a
 %                    tensor with more than 3 channels, e.g., a
 %                    R/G/B/IR image or a hyperspectral image.
-% array:             the numbers of patches in y and x directions in the
+% layout:            the numbers of patches in y and x directions in the
 %                    color checker. For example, [4, 6] for the classic
 %                    color checker. Note that this parameter is independent
 %                    on the placement direction (landscape or portrait) of
@@ -32,15 +32,15 @@ function [colors, roi_rects] = checker2colors(checker_img, array, varargin)
 %                    extract patches in the correct order.
 %                    'drag' (default) | 'click'
 % roi:               explicitly specify the coordinates of the roi
-%                    rectangles. Must be a Nx4 matrix, where N = array(1) *
-%                    array(2) and each row is in [x_begin, y_begin, width,
-%                    height] form. This parameter is useful when in a batch 
-%                    extraction scenario, where user is expecting to
-%                    extract responses from multiple images with the fixed
-%                    color checker positions. For the first image, use
-%                    [colors_1, roi] = checker2colors(checker_img, array),
-%                    and for the others, use
-%                    colors_N = checker2colors(checker_img, array, 'roi',
+%                    rectangles. Must be a Nx4 matrix, where N = layout(1)
+%                    * layout(2) and each row is in [x_begin, y_begin,
+%                    width, height] form. This parameter is useful when in
+%                    a batch extraction scenario, where user is expecting
+%                    toextract responses from multiple images with the
+%                    fixed color checker positions. For the first image,
+%                    use [colors_1, roi] = checker2colors(checker_img,
+%                    layout), and for the others, use 
+%                    colors_N = checker2colors(checker_img, layout, 'roi',
 %                    roi). If 'roi' is given, 'method', 'roisize', and
 %                    'direction' parameters will be invalid, but you can
 %                    still set 'allowadjust' to true to adjust the ROI
@@ -48,10 +48,10 @@ function [colors, roi_rects] = checker2colors(checker_img, array, varargin)
 % allowadjust:       boolean value. If set to true, user will be allowed to
 %                    adjust the ROI positions in the image after locating
 %                    the vertices of color checker. ROI is where the color
-%                    responses are to be extracted from.
+%                    responses are to be extracted from. (default = false)
 % roisize:           size of the square ROI. If not given, it will be
 %                    automatically determined to be about 40% of the patch
-%                    size (inferred by both 'array' and the color checker
+%                    size (inferred by both 'layout' and the color checker
 %                    region you chose). (default = [])
 % direction:         the direction in which the patches are indexed.
 %                    'row' (default) | 'column'
@@ -66,7 +66,7 @@ function [colors, roi_rects] = checker2colors(checker_img, array, varargin)
 %
 % OUTPUTS:
 % colors:            N*C matrix of the extracted color responses, where N =
-%                    array(1) * array(2) and C is the number of image
+%                    layout(1) * layout(2) and C is the number of image
 %                    channels (usually is 3).
 % roi_rects:         coordinates of ROI rectangles, which can be cooperated
 %                    with 'roi' parameter in the batch extraction cases.
@@ -93,9 +93,9 @@ if max(checker_img(:)) > 1 || max(checker_img(:)) < 0
 end
 [height, width, depth] = size(checker_img);
 
-% check the array of color checker
-assert(length(array) == 2, '''array'' must be a 2-element vector.');
-N = prod(array);
+% check the layout of color checker
+assert(length(layout) == 2, '''layout'' must be a 2-element vector.');
+N = prod(layout);
 
 % get coordinates of the patches' centers
 if isempty(param.roi)
@@ -168,9 +168,9 @@ if isempty(param.roi)
     % determine the roi size
     if isempty(param.roisize)
         roi_width = min(vertex_pts(2,1) - vertex_pts(1,1),...
-                        vertex_pts(3,1) - vertex_pts(4,1)) / array(2);
+                        vertex_pts(3,1) - vertex_pts(4,1)) / layout(2);
         roi_height = min(vertex_pts(4,2) - vertex_pts(1,2),...
-                         vertex_pts(3,2) - vertex_pts(2,2)) / array(1);
+                         vertex_pts(3,2) - vertex_pts(2,2)) / layout(1);
         param.roisize = ceil(0.4 * min(roi_width, roi_height));
     end
     radius = ceil(param.roisize/2);
@@ -178,7 +178,7 @@ if isempty(param.roi)
     % each row in grid_pts coeresponds to the coordinate of the CENTER of
     % one color patch, in [x_center, y_center] form. grid_pts is in the
     % coordinate system of the rotated image
-    grid_pts = vert2grids(vertex_pts, array, param.direction);
+    grid_pts = vert2grids(vertex_pts, layout, param.direction);
     
     % round off and clip
     grid_pts = round(grid_pts);
@@ -194,7 +194,7 @@ if isempty(param.roi)
     roi_rects = [grid_pts - radius, repmat(param.roisize, N, 2)];
 else
     assert(isequal(size(param.roi), [N, 4]),...
-           '''points'' must be a Nx4 matrix, where N = array(1) * array(2).');
+           '''points'' must be a Nx4 matrix, where N = layout(1) * layout(2).');
     roi_rects = param.roi;
 end
 
@@ -295,7 +295,7 @@ pause(0.1); % maximizing the figure has some delay
 end
 
 
-function grid_pts = vert2grids(vert_pts, array, direction)
+function grid_pts = vert2grids(vert_pts, layout, direction)
 %%
 % function VERT2GRIDS generates a set of grid coordinates inside a
 % quadrangle, of which the 4 vertices are determined by vert_pts.
@@ -311,8 +311,8 @@ rect_pts = bbox2points(rect);
 H = fitgeotrans(vert_pts, rect_pts, 'projective');
 
 % grid inside the rectangle
-[grid_x, grid_y] = meshgrid(linspace(rect_pts(1,1), rect_pts(3,1), 2*array(2)+1),...
-                            linspace(rect_pts(1,2), rect_pts(3,2), 2*array(1)+1));
+[grid_x, grid_y] = meshgrid(linspace(rect_pts(1,1), rect_pts(3,1), 2*layout(2)+1),...
+                            linspace(rect_pts(1,2), rect_pts(3,2), 2*layout(1)+1));
 grid_x = grid_x(2:2:end, 2:2:end);
 grid_y = grid_y(2:2:end, 2:2:end);
 switch direction

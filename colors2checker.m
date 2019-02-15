@@ -21,13 +21,16 @@ function [img, hfig] = colors2checker(color_groups, varargin)
 % OPTIONAL PARAMETERS:
 % legend:            names of different color groups. It must be a cell
 %                    array containing character arrays. If there is only
-%                    one color group, no legend will be displayed.
+%                    one color group, no legend will be displayed. (default
+%                    = {})
 % direction:         the direction in which the colors are indexed.
 %                    'row' (default) | 'column'
-% array:             the numbers of patches in y and x directions in the
+% layout:            the numbers of patches in y and x directions in the
 %                    color checker, where x*y must be equal to the (max)
 %                    number of colors in color groups. For example, [4, 6]
-%                    for the classic color checker.
+%                    for the classic color checker. If this parameter is
+%                    not given, the layout of color checker will be
+%                    determined automatically. (default = [])
 % squaresize:        the size of each color patch in pixel (default = 240)
 %
 % OUTPUTS:
@@ -61,16 +64,16 @@ sample_nums = cellfun(@(x) size(x, 1), color_groups);
 max_sample_num = max(sample_nums);
 
 % numbers of patches in y and x dirrections in the color checker
-if isempty(param.array)
-    param.array = factor2(max_sample_num);
+if isempty(param.layout)
+    param.layout = factor2(max_sample_num);
 else
-    assert(numel(param.array)==2 && prod(param.array) == max_sample_num,...
-           ['''array'' should be a 2-element vector [r, c], ',...
+    assert(numel(param.layout)==2 && prod(param.layout) == max_sample_num,...
+           ['''layout'' should be a 2-element vector [r, c], ',...
             'where r*c must be equal to the number of color samples.']);
 end
 
 % draw the color checker image
-img = cell(param.array);
+img = cell(param.layout);
 for j = 1:max_sample_num
     colors = zeros(groups_num, 3);
     for i = 1:groups_num
@@ -83,9 +86,9 @@ for j = 1:max_sample_num
     % indexing direction
     switch param.direction
         case 'row'
-            [col, row] = ind2sub(param.array(end:-1:1), j);
+            [col, row] = ind2sub(param.layout(end:-1:1), j);
         case 'column'
-            [row, col] = ind2sub(param.array, j);
+            [row, col] = ind2sub(param.layout, j);
         otherwise
             error('''direction'' parameter can only be ''row'' or ''column''.');
     end
@@ -220,7 +223,7 @@ function param = parseInput(varargin)
 parser = inputParser;
 parser.addParameter('legend', {}, @(x)validateattributes(x, {'char', 'cell'}, {}));
 parser.addParameter('direction', 'row', @ischar);
-parser.addParameter('array', [], @(x)validateattributes(x, {'numeric'}, {'positive'}));
+parser.addParameter('layout', [], @(x)validateattributes(x, {'numeric'}, {'positive'}));
 parser.addParameter('squaresize', 240, @(x)validateattributes(x, {'numeric'}, {'positive'}));
 parser.parse(varargin{:});
 param = parser.Results;
