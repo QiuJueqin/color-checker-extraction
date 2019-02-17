@@ -31,7 +31,7 @@ function [img, hfig] = colors2checker(color_groups, varargin)
 %                    for the classic color checker. If this parameter is
 %                    not given, the layout of color checker will be
 %                    determined automatically. (default = [])
-% squaresize:        the size of each color patch in pixel (default = 240)
+% squaresize:        the size of each color patch in pixel (default = 200)
 %
 % OUTPUTS:
 % img:               the color checker image
@@ -62,6 +62,8 @@ assert(groups_num >= 1 && groups_num <= 5,...
 % numbers of colors for different groups
 sample_nums = cellfun(@(x) size(x, 1), color_groups);
 max_sample_num = max(sample_nums);
+assert(max_sample_num <= 1024,...
+       'The number of samples exceeds the maximum limit (1024).');
 
 % numbers of patches in y and x dirrections in the color checker
 if isempty(param.layout)
@@ -209,7 +211,7 @@ end
 function fct2 = factor2(num)
 %%
 % factorize num into two closest factors f1 and f2 (f1 < f2)
-f1 = floor(sqrt(num));
+f1 = floor(sqrt(num/1.4)); % quotient >1 for a rectangle instead of square
 while mod(num, f1) ~= 0
     f1 = f1 - 1;
 end
@@ -224,7 +226,7 @@ parser = inputParser;
 parser.addParameter('legend', {}, @(x)validateattributes(x, {'char', 'cell'}, {}));
 parser.addParameter('direction', 'row', @ischar);
 parser.addParameter('layout', [], @(x)validateattributes(x, {'numeric'}, {'positive'}));
-parser.addParameter('squaresize', 240, @(x)validateattributes(x, {'numeric'}, {'positive'}));
+parser.addParameter('squaresize', 200, @(x)validateattributes(x, {'numeric'}, {'positive'}));
 parser.parse(varargin{:});
 param = parser.Results;
 % check the params
