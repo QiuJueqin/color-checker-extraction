@@ -32,6 +32,9 @@ function [img, hfig] = colors2checker(color_groups, varargin)
 %                    not given, the layout of color checker will be
 %                    determined automatically. (default = [])
 % squaresize:        the size of each color patch in pixel (default = 200)
+% show:              boolean value to determine whether to show the
+%                    generated color checker. If set to false, only return
+%                    the color checker image. (default = true)
 %
 % OUTPUTS:
 % img:               the color checker image
@@ -133,6 +136,8 @@ switch groups_num
         captions = {'Center', 'Top left', 'Top right', 'Bottom left', 'Bottom right'};
         img_height = 0.65;
 end
+
+legend_str = cell(1, groups_num);
 for i = 1:groups_num
     if i > numel(param.legend)
         param.legend{i} = sprintf('color group %d', i); % default group name
@@ -141,15 +146,19 @@ for i = 1:groups_num
 end
 legend_str = strjoin(legend_str, '\n');
 
-try
-    hfig = figureFullScreen('color', 'w');
-catch
-    hfig = figure('color', 'w');
-end
-hax = axes(hfig, 'Position', [0.05, 0.95-img_height, 0.9, img_height]);
-imshow(img, 'Parent', hax);
-if groups_num > 1
-    xlabel(legend_str, 'FontSize', 16);
+if param.show == true
+    try
+        hfig = figureFullScreen('color', 'w');
+    catch
+        hfig = figure('color', 'w');
+    end
+    hax = axes(hfig, 'Position', [0.05, 0.95-img_height, 0.9, img_height]);
+    imshow(img, 'Parent', hax);
+    if groups_num > 1
+        xlabel(legend_str, 'FontSize', 16);
+    end
+else
+    hfig = [];
 end
 
 end
@@ -224,9 +233,10 @@ function param = parseInput(varargin)
 % parse inputs & return structure of parameters
 parser = inputParser;
 parser.PartialMatching = false;
-parser.addParameter('legend', {}, @(x)validateattributes(x, {'char', 'cell'}, {}));
 parser.addParameter('direction', 'row', @ischar);
 parser.addParameter('layout', [], @(x)validateattributes(x, {'numeric'}, {'positive'}));
+parser.addParameter('legend', {}, @(x)validateattributes(x, {'char', 'cell'}, {}));
+parser.addParameter('show', true, @islogical);
 parser.addParameter('squaresize', 200, @(x)validateattributes(x, {'numeric'}, {'positive'}));
 parser.parse(varargin{:});
 param = parser.Results;

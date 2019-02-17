@@ -4,6 +4,10 @@ function [colors, roi_rects] = checker2colors(checker_img, layout, varargin)
 % checker. Two modes, 'drag' and 'click', are supported. ('auto' mode is to
 % be done in the future)
 %
+% Note: for applications where high accuracies are required, you'd better
+%       do some correction for the color checker image first, e.g., spatial
+%       non-uniformity correction, noise reduction, etc.
+%
 % USAGE:
 % [colors, roi_rects] = checker2colors(checker_img, layout,...
 %                                      'param', value, ...);
