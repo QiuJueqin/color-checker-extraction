@@ -223,6 +223,7 @@ function param = parseInput(varargin)
 %%
 % parse inputs & return structure of parameters
 parser = inputParser;
+parser.PartialMatching = false;
 parser.addParameter('legend', {}, @(x)validateattributes(x, {'char', 'cell'}, {}));
 parser.addParameter('direction', 'row', @ischar);
 parser.addParameter('layout', [], @(x)validateattributes(x, {'numeric'}, {'positive'}));

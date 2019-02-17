@@ -341,6 +341,7 @@ function param = parseInput(varargin)
 %%
 % parse inputs & return structure of parameters
 parser = inputParser;
+parser.PartialMatching = false;
 parser.addParameter('allowadjust', false, @(x)islogical(x));
 parser.addParameter('direction', 'row', @ischar);
 parser.addParameter('mode', 'drag', @ischar);
