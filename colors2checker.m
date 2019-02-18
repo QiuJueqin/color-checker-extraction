@@ -32,6 +32,9 @@ function [img, hfig] = colors2checker(color_groups, varargin)
 %                    not given, the layout of color checker will be
 %                    determined automatically. (default = [])
 % squaresize:        the size of each color patch in pixel (default = 200)
+% parent:            axes object that specify the parent axes of the image.
+%                    If not given, a new figure and a axes will be created.
+%                    (default = [])
 % show:              boolean value to determine whether to show the
 %                    generated color checker. If set to false, only return
 %                    the color checker image. (default = true)
@@ -147,12 +150,16 @@ end
 legend_str = strjoin(legend_str, '\n');
 
 if param.show == true
-    try
-        hfig = figureFullScreen('color', 'w');
-    catch
-        hfig = figure('color', 'w');
+    if isempty(param.parent)
+        try
+            hfig = figureFullScreen('color', 'w');
+        catch
+            hfig = figure('color', 'w');
+        end
+        hax = axes(hfig, 'Position', [0.05, 0.95-img_height, 0.9, img_height]);
+    else
+        hax = param.parent;
     end
-    hax = axes(hfig, 'Position', [0.05, 0.95-img_height, 0.9, img_height]);
     imshow(img, 'Parent', hax);
     if groups_num > 1
         xlabel(legend_str, 'FontSize', 16);
@@ -236,6 +243,7 @@ parser.PartialMatching = false;
 parser.addParameter('direction', 'row', @ischar);
 parser.addParameter('layout', [], @(x)validateattributes(x, {'numeric'}, {'positive'}));
 parser.addParameter('legend', {}, @(x)validateattributes(x, {'char', 'cell'}, {}));
+parser.addParameter('parent', [], @ishandle);
 parser.addParameter('show', true, @islogical);
 parser.addParameter('squaresize', 200, @(x)validateattributes(x, {'numeric'}, {'positive'}));
 parser.parse(varargin{:});
@@ -243,4 +251,7 @@ param = parser.Results;
 % check the params
 assert(param.squaresize >= 64,...
        'square size must be greater than 64.');
+if ~isempty(param.parent)
+    param.show = true;
+end
 end
