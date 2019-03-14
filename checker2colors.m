@@ -131,7 +131,7 @@ if isempty(param.roi)
         otherwise
             error('''mode'' must be either ''drag'' or ''click''.');
     end
-    % grid_pts will be a 4x2 matrix in [A; B; C; D] order
+    % vertex_pts will be a 4x2 matrix in [A; B; C; D] order:
     % A - - - - B
     % |         |
     % D - - - - C

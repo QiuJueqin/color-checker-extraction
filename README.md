@@ -4,7 +4,7 @@ Color Checker Extraction Toolbox allows you to pick up color responses from imag
 
 MATLAB version R2018b or higher with Image Processing Toolbox is **recommended** in order to implement [images.roi](https://www.mathworks.com/help/images/roi-based-processing.html) object. But for other versions the normal [rectangle](https://www.mathworks.com/help/matlab/ref/rectangle.html) function works well too.
 
-Following screen records will give you a brief impression.
+Following screen records will give you a brief impression about how it works.
 
 # Demo
 
