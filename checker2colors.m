@@ -233,6 +233,7 @@ if param.allowadjust
                        'Callback', @pushbutton_callback);
     uiwait(hfig);
     roi_rects = cell2mat(cellfun(@(x)x.Position, hroi, 'uniformoutput', false));
+    commandwindow;
 end
 
 % determine the statistical way to extract responses from rois

@@ -265,8 +265,8 @@ parser.addParameter('squaresize', 200, @(x)validateattributes(x, {'numeric'}, {'
 parser.parse(varargin{:});
 param = parser.Results;
 % check the params
-assert(param.squaresize >= 64,...
-       'square size must be greater than 64.');
+assert(param.squaresize >= 50,...
+       'square size must be greater than 50.');
 if ~isempty(param.parent)
     param.show = true;
 end
